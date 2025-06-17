@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Código EAN13 - Carnes San Martín</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 28px;
+        }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo-container img {
+            max-width: 200px;
+            height: auto;
+        }
+        label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            display: block;
+            margin-bottom: 8px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px;
+            font-size: 18px;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .result h3 {
+            font-size: 20px;
+            color: #333;
+        }
+        .barcode {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo-container">
+        <img src="https://logosnicas.com/wp-content/uploads/2022/08/carnes_san_martin_2024.png" alt="Carnes San Martín">
+    </div>
+    
+    <h1>Generador de Código EAN13</h1>
+    
+    <form id="eanForm">
+        <label for="codigoArticulo">Código del Artículo (5 dígitos):</label>
+        <input type="number" id="codigoArticulo" required maxlength="5">
+        
+        <label for="pesoArticulo">Peso del Artículo (5 dígitos):</label>
+        <input type="number" id="pesoArticulo" required maxlength="5">
+        
+        <button type="submit">Generar Código EAN13</button>
+    </form>
+    
+    <div class="result">
+        <h3>Código EAN13 Generado:</h3>
+        <p class="barcode" id="codigoEAN"></p>
+    </div>
+</div>
+
+<script>
+    document.getElementById("eanForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        // Obtener los valores de los campos
+        const codigoArticulo = document.getElementById("codigoArticulo").value.padStart(5, "0");
+        const pesoArticulo = document.getElementById("pesoArticulo").value.padStart(5, "0");
+        
+        // Verificar que los campos tengan los valores correctos
+        if(codigoArticulo.length === 5 && pesoArticulo.length === 5) {
+            // El código EAN13 comienza con "20"
+            const codigoBase = "20" + codigoArticulo + pesoArticulo;
+
+            // Generar número verificador aleatorio
+            const verificador = Math.floor(Math.random() * 10);
+
+            // El código completo EAN13
+            const codigoEAN13 = codigoBase + verificador;
+
+            // Mostrar el código generado
+            document.getElementById("codigoEAN").textContent = codigoEAN13;
+        } else {
+            alert("Por favor, ingrese un código de artículo y peso válidos.");
+        }
+    });
+</script>
+
+</body>
+</html>
