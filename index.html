@@ -69,11 +69,34 @@
             font-size: 20px;
             color: #333;
         }
-        .barcode {
-            margin-top: 10px;
+        .barcode-container {
+            margin-top: 20px;
             text-align: center;
         }
+        .barcode-label {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+        #printSection {
+            display: none;
+        }
         @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printSection, #printSection * {
+                visibility: visible;
+            }
+            #printSection {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                margin: 0;
+                padding: 10px;
+                box-sizing: border-box;
+            }
             button {
                 display: none;
             }
@@ -94,18 +117,32 @@
         <input type="number" id="codigoArticulo" required maxlength="5" min="0" step="1">
         
         <label for="pesoArticulo">Peso del Artículo (3 dígitos enteros y 2 decimales):</label>
-        <input type="text" id="pesoArticulo" required maxlength="5" placeholder="Ej: 002.22">
+        <input type="text" id="pesoArticulo" required maxlength="6" placeholder="Ej: 025.250">
         
         <button type="submit">Generar Código EAN13</button>
     </form>
     
     <div class="result">
         <h3>Código EAN13 Generado:</h3>
-        <p class="barcode" id="codigoEAN"></p>
-        <svg id="barcode"></svg> <!-- Aquí se generará el código de barras -->
+        <p class="barcode-label" id="codigoEAN"></p>
+        <div class="barcode-container">
+            <svg id="barcode"></svg> <!-- Aquí se generará el código de barras -->
+            <p class="barcode-label" id="barcodeText"></p>
+        </div>
     </div>
     
-    <button onclick="window.print()">Imprimir Etiqueta</button>
+    <button onclick="imprimirEtiqueta()">Imprimir Etiqueta</button>
+</div>
+
+<!-- Sección oculta para la impresión -->
+<div id="printSection">
+    <div style="text-align: center; padding: 20px;">
+        <img src="https://logosnicas.com/wp-content/uploads/2022/08/carnes_san_martin_2024.png" alt="Carnes San Martín" style="max-width: 150px;">
+        <h2>Etiqueta de Producto</h2>
+        <p id="printCodigoEAN"></p>
+        <svg id="printBarcode"></svg>
+        <p id="printDetails"></p>
+    </div>
 </div>
 
 <script>
@@ -117,13 +154,26 @@
         
         // Obtener y formatear el peso del artículo
         let pesoArticulo = document.getElementById("pesoArticulo").value.trim();
-        
-        // Asegurarse de que el peso tenga el formato correcto (3 enteros y 2 decimales)
+
+        // Asegurarse de que el peso esté en el formato correcto (3 enteros y 2 decimales)
         if (/^\d{1,3}(\.\d{1,2})?$/.test(pesoArticulo)) {
-            // Si el peso tiene decimales, agregar ceros si es necesario
-            pesoArticulo = pesoArticulo.replace(".", "").padStart(5, "0");
+            let [enteros, decimales] = pesoArticulo.split(".");
+
+            // Si el número entero tiene solo 2 dígitos, no lo modificamos
+            if (enteros.length === 1) {
+                // Si el entero tiene un dígito, agregamos un 0 al principio
+                enteros = "0" + enteros;
+            }
+            
+            // Si el peso tiene solo 2 decimales, le añadimos un cero al final
+            if (decimales && decimales.length === 2) {
+                decimales = decimales + "0";
+            }
+
+            // Formar el peso con 3 enteros y 3 decimales sin punto
+            pesoArticulo = enteros + decimales;
         } else {
-            alert("Por favor, ingrese un peso válido en el formato 000.00");
+            alert("Por favor, ingrese un peso válido en el formato 000.000");
             return;
         }
         
@@ -139,18 +189,36 @@
             const codigoEAN13 = codigoBase + verificador;
 
             // Mostrar el código generado
-            document.getElementById("codigoEAN").textContent = codigoEAN13;
+            document.getElementById("codigoEAN").textContent = "Código EAN13: " + codigoEAN13;
+            document.getElementById("barcodeText").textContent = "Código: " + codigoEAN13 + " | Peso: " + pesoArticulo.substring(0, 3) + "." + pesoArticulo.substring(3, 6) + " lbs";
             
             // Generar el código de barras con JsBarcode
             JsBarcode("#barcode", codigoEAN13, {
                 format: "EAN13",
                 displayValue: true
             });
+
+            // Guardar los datos para impresión
+            document.getElementById("printCodigoEAN").textContent = "Código EAN13: " + codigoEAN13;
+            JsBarcode("#printBarcode", codigoEAN13, {
+                format: "EAN13",
+                displayValue: true
+            });
+            document.getElementById("printDetails").textContent = "Código: " + codigoEAN13 + " | Peso: " + pesoArticulo.substring(0, 3) + "." + pesoArticulo.substring(3, 6) + " lbs";
         } else {
             alert("Por favor, ingrese un código de artículo y peso válidos.");
         }
     });
+
+    // Función para imprimir solo la etiqueta
+    function imprimirEtiqueta() {
+        var printSection = document.getElementById("printSection");
+        printSection.style.display = 'block'; // Mostrar la sección de impresión
+        window.print(); // Imprimir
+        printSection.style.display = 'none'; // Ocultar la sección después de imprimir
+    }
 </script>
 
 </body>
 </html>
+
